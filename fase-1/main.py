@@ -1,10 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from typing import Union
 
 from pydantic import BaseModel
 
 app = FastAPI()
-
 class Item(BaseModel):
     item_name: str
     item_price: float
@@ -15,13 +14,30 @@ maca = Item(item_name = "Apple", item_price = 1.99, item_description = "A red ap
 laranja = Item(item_name = "Orange", item_price = 2.99, item_description = "A orange", item_quantity = 20)
 banana = Item(item_name = "Banana", item_price = 3.99, item_description = "A banana", item_quantity = 30)
 
-listaItens = {0:maca, 1:laranja, 2:banana}
+inventory = {0:maca, 1:laranja, 2:banana}
 
 @app.get("/items")
-async def get_items():
-    return listaItens
+async def get_inventory():
+    return inventory
 
 @app.get("/items/{item_id}")
 async def get_item(item_id: int):
-    result = listaItens[item_id-1]
+    if item_id not in inventory.keys():
+        raise HTTPException(status_code=404, detail="Item not found")
+    result = inventory[item_id]
     return {"item_id": item_id, "item": result,}
+
+@app.post("/items/")
+async def create_item(item: Item):
+    inventory[len(inventory)] = item
+    return item
+
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Item):
+    if item_id not in inventory.keys():
+        raise HTTPException(status_code=404, detail="Item not found")
+    inventory[item_id] = item
+    return inventory[item_id]
+
+
+
