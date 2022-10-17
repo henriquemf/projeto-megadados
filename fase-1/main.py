@@ -39,5 +39,10 @@ async def update_item(item_id: int, item: Item):
     inventory[item_id] = item
     return inventory[item_id]
 
-
+@app.delete("/items/{item_id}")
+async def delete_item(item_id: int):
+    if item_id not in inventory.keys():
+        raise HTTPException(status_code=404, detail="Item not found")
+    del inventory[item_id]
+    return inventory
 
