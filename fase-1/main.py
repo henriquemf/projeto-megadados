@@ -1,48 +1,137 @@
-from fastapi import FastAPI, HTTPException
-from typing import Union
+from fastapi import FastAPI, HTTPException, Path, Body, Query, status
+from typing import Union, Optional
 
 from pydantic import BaseModel
 
 app = FastAPI()
-class Item(BaseModel):
-    item_name: str
-    item_price: float
-    item_description: Union[str, None] = None
-    item_quantity: int
+class Product(BaseModel):
+    name: str
+    price: float
+    description: Union[str, None] = None
+    quantity: int
 
-maca = Item(item_name = "Apple", item_price = 1.99, item_description = "A red apple", item_quantity = 10)
-laranja = Item(item_name = "Orange", item_price = 2.99, item_description = "A orange", item_quantity = 20)
-banana = Item(item_name = "Banana", item_price = 3.99, item_description = "A banana", item_quantity = 30)
+maca = Product(name = "Apple", price = 1.99, description = "A red apple", quantity = 10)
+laranja = Product(name = "Orange", price = 2.99, description = "A orange", quantity = 20)
+banana = Product(name = "Banana", price = 3.99, description = "A banana", quantity = 30)
 
 inventory = {0:maca, 1:laranja, 2:banana}
 
-@app.get("/items")
+#-----------------------------------STARTING PAGE----------------------------------#
+
+@app.get("/")
+def read_root():
+    return {"Página Inicial": "Bem vindo a API de estoque, caminhos disponíveis: /inventory, /inventory/{product_id}, create-product, update-product/{product_id}, delete-product/{product_id}, patch-product/{product_id}"}
+
+#---------------------------------GET ALL PRODUCTS---------------------------------#
+
+@app.get("/inventory")
 async def get_inventory():
     return inventory
 
-@app.get("/items/{item_id}")
-async def get_item(item_id: int):
-    if item_id not in inventory.keys():
-        raise HTTPException(status_code=404, detail="Item not found")
-    result = inventory[item_id]
-    return {"item_id": item_id, "item": result,}
+#--------------------------------GET BY SPECIFIC ID--------------------------------#
 
-@app.post("/items/")
-async def create_item(item: Item):
-    inventory[len(inventory)] = item
-    return item
+@app.get("/inventory/{product_id}")
+async def get_product(
+    product_id: int = Path(
+        alias="Product ID",
+        description="Select your desired Product by it's ID"
+    )
+):
+    if product_id not in inventory.keys():
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"product_id": product_id, "product": inventory[product_id]}
 
-@app.put("/items/{item_id}")
-async def update_item(item_id: int, item: Item):
-    if item_id not in inventory.keys():
-        raise HTTPException(status_code=404, detail="Item not found")
-    inventory[item_id] = item
-    return inventory[item_id]
 
-@app.delete("/items/{item_id}")
-async def delete_item(item_id: int):
-    if item_id not in inventory.keys():
-        raise HTTPException(status_code=404, detail="Item not found")
-    del inventory[item_id]
-    return inventory
+#--------------------------------CREATE NEW PRODUCT--------------------------------#
 
+@app.post("/create-product/", response_model=Product, status_code=status.HTTP_201_CREATED)
+async def create_product(
+    product: Product = Body(
+        example={
+            "name": "Apple", 
+            "price": 1.99, 
+            "description": "A red apple", 
+            "quantity": 10
+        }
+    )
+):
+    inventory[len(inventory)] = product
+    return {"product_id": len(inventory)-1, "product": inventory[len(inventory)-1]}
+
+#----------------------------------UPDATE PRODUCT----------------------------------#
+
+### PUT ###
+@app.put("/update-product/{product_id}")
+async def update_product(
+    product_id: int = Path(
+        alias="Product ID",
+        description="Select your desired Product by it's ID"
+    ),
+    product: Product = Body(
+        example={
+            "name": "Apple", 
+            "price": 1.99, 
+            "description": "A red apple", 
+            "quantity": 10
+        }
+    )
+):
+    if product_id not in inventory.keys():
+        raise HTTPException(status_code=404, detail="Product not found")
+    inventory[product_id] = product
+    return {"product_id": product_id, "product": inventory[product_id]}
+
+### PATCH ###
+@app.patch("/patch-product/{product_id}")
+async def update_product(
+    product_id: int = Path(
+        alias="Product ID",
+        description="Select your desired Product by it's ID"
+    ),
+    product_name: Optional[str] = Query(
+        None,
+        alias="Product Name",
+        description="Change Product name (not required)"
+    ),
+    product_price: Optional[float] = Query(
+        None,
+        alias="Product Price",
+        description="Change Product price (not required)"
+    ),
+    product_description: Optional[str] = Query(
+        None,
+        alias="Product Description",
+        description="Change Product description (not required)"
+    ),
+    product_quantity: Optional[int] = Query(
+        None,
+        alias="Product Quantity",
+        description="Change Product quantity (not required)"
+    )
+):
+    if product_id not in inventory.keys():
+        raise HTTPException(status_code=404, detail="Product not found")
+    if product_name != None:
+        inventory[product_id].name = product_name
+    if product_price != None:
+        inventory[product_id].price = product_price
+    if product_description != None:
+        inventory[product_id].description = product_description
+    if product_quantity != None:
+        inventory[product_id].quantity = product_quantity
+    return {"product_id": product_id, "product": inventory[product_id]}
+    
+#----------------------------------DELETE PRODUCT----------------------------------#
+
+@app.delete("/delete-product/{product_id}")
+async def delete_product(
+    product_id: int = Path(
+        alias="Product ID",
+        description="Select your desired Product by it's ID"
+    )
+):
+    if product_id not in inventory.keys():
+        raise HTTPException(status_code=404, detail="Product not found")
+    temp = inventory[product_id]
+    del inventory[product_id]
+    return {"product_id": product_id, "product": temp}
