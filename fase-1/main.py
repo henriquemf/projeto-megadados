@@ -20,7 +20,7 @@ inventory = {0:maca, 1:laranja, 2:banana}
 
 @app.get("/")
 def read_root():
-    return {"Página Inicial": "Bem vindo a API de estoque, caminhos disponíveis: /inventory, /inventory/{product_id}, create-product, update-product/{product_id}, delete-product/{product_id}, patch-product/{product_id}"}
+    return {"Página Inicial": "Bem vindo a API de estoque, caminhos disponíveis: '/inventory' para GET e POST , '/inventory/{product_id}' para GET, PUT, PATCH e DELETE"}
 
 #---------------------------------GET ALL PRODUCTS---------------------------------#
 
@@ -44,7 +44,7 @@ async def get_product(
 
 #--------------------------------CREATE NEW PRODUCT--------------------------------#
 
-@app.post("/create-product/", response_model=Product, status_code=status.HTTP_201_CREATED)
+@app.post("/inventory/", response_model=Product, status_code=status.HTTP_201_CREATED)
 async def create_product(
     product: Product = Body(
         example={
@@ -61,8 +61,8 @@ async def create_product(
 #----------------------------------UPDATE PRODUCT----------------------------------#
 
 ### PUT ###
-@app.put("/update-product/{product_id}")
-async def update_product(
+@app.put("/inventory/{product_id}")
+async def update_product_by_put(
     product_id: int = Path(
         alias="Product ID",
         description="Select your desired Product by it's ID"
@@ -82,8 +82,8 @@ async def update_product(
     return {"product_id": product_id, "product": inventory[product_id]}
 
 ### PATCH ###
-@app.patch("/patch-product/{product_id}")
-async def update_product(
+@app.patch("/inventory/{product_id}")
+async def update_product_by_patch(
     product_id: int = Path(
         alias="Product ID",
         description="Select your desired Product by it's ID"
@@ -123,7 +123,7 @@ async def update_product(
     
 #----------------------------------DELETE PRODUCT----------------------------------#
 
-@app.delete("/delete-product/{product_id}")
+@app.delete("/inventory/{product_id}")
 async def delete_product(
     product_id: int = Path(
         alias="Product ID",
