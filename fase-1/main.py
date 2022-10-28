@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, Path, Body, Query, status
 from typing import Union, Optional
 
 from pydantic import BaseModel
-
 app = FastAPI()
 class Product(BaseModel):
     name: str
@@ -33,9 +32,9 @@ async def get_inventory():
 @app.get("/inventory/{product_id}")
 async def get_product(
     product_id: int = Path(
-        alias="Product ID",
+        title = "Product ID",
         description="Select your desired Product by it's ID"
-    )
+    ),
 ):
     if product_id not in inventory.keys():
         raise HTTPException(status_code=404, detail="Product not found")
@@ -44,7 +43,7 @@ async def get_product(
 
 #--------------------------------CREATE NEW PRODUCT--------------------------------#
 
-@app.post("/inventory/", response_model=Product, status_code=status.HTTP_201_CREATED)
+@app.post("/inventory/", status_code=status.HTTP_201_CREATED)
 async def create_product(
     product: Product = Body(
         example={
@@ -55,16 +54,17 @@ async def create_product(
         }
     )
 ):
-    inventory[len(inventory)] = product
-    return {"product_id": len(inventory)-1, "product": inventory[len(inventory)-1]}
+    inventory[max(inventory.keys()) + 1] = product
+    return {"product_id": max(inventory.keys()), "product": inventory[max(inventory.keys())]}
+    
 
 #----------------------------------UPDATE PRODUCT----------------------------------#
 
 ### PUT ###
 @app.put("/inventory/{product_id}")
 async def update_product_by_put(
-    product_id: int = Path(
-        alias="Product ID",
+    product_id: int = Query(
+        title="Product ID",
         description="Select your desired Product by it's ID"
     ),
     product: Product = Body(
@@ -84,28 +84,28 @@ async def update_product_by_put(
 ### PATCH ###
 @app.patch("/inventory/{product_id}")
 async def update_product_by_patch(
-    product_id: int = Path(
-        alias="Product ID",
+    product_id: int = Query(
+        title="Product ID",
         description="Select your desired Product by it's ID"
     ),
     product_name: Optional[str] = Query(
         None,
-        alias="Product Name",
+        title="Product Name",
         description="Change Product name (not required)"
     ),
     product_price: Optional[float] = Query(
         None,
-        alias="Product Price",
+        title="Product Price",
         description="Change Product price (not required)"
     ),
     product_description: Optional[str] = Query(
         None,
-        alias="Product Description",
+        title="Product Description",
         description="Change Product description (not required)"
     ),
     product_quantity: Optional[int] = Query(
         None,
-        alias="Product Quantity",
+        title="Product Quantity",
         description="Change Product quantity (not required)"
     )
 ):
@@ -125,8 +125,8 @@ async def update_product_by_patch(
 
 @app.delete("/inventory/{product_id}")
 async def delete_product(
-    product_id: int = Path(
-        alias="Product ID",
+    product_id: int = Query(
+        title="Product ID",
         description="Select your desired Product by it's ID"
     )
 ):
