@@ -54,7 +54,12 @@ async def create_product(
         }
     )
 ):
-    inventory[max(inventory.keys()) + 1] = product
+
+    if inventory == {}: 
+        product_id = 0
+    else:
+        product_id = max(inventory.keys()) + 1
+    inventory[product_id] = product
     return {"product_id": max(inventory.keys()), "product": inventory[max(inventory.keys())]}
     
 
@@ -78,6 +83,7 @@ async def update_product_by_put(
 ):
     if product_id not in inventory.keys():
         raise HTTPException(status_code=404, detail="Product not found")
+    
     inventory[product_id] = product
     return {"product_id": product_id, "product": inventory[product_id]}
 
