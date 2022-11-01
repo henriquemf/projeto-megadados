@@ -30,17 +30,25 @@ async def get_inventory():
 
 #--------------------------------GET BY SPECIFIC ID--------------------------------#
 
-@app.get("/inventory/{product_id}")
+@app.get("/inventory/{product_id}", status_code = 200, response_model_exclude_unset = True)
 async def get_product(
     product_id: int = Path(
-        alias="Product ID",
-        description="Select your desired Product by it's ID"
+        title="Product ID",
+        description="Select your desired Product by it's ID", 
+        gt = -1, 
+        le = len(inventory)-1
     )
 ):
-    if product_id not in inventory.keys():
+    if product_id not in inventory:
         raise HTTPException(status_code=404, detail="Product not found")
     return {"product_id": product_id, "product": inventory[product_id]}
 
+# @app.get("/inventory/{product_id}", status_code = 200, response_model = Product, response_model_exclude_unset = True)
+# async def get_product(product_id: int = Path(..., gt = -1, le = len(inventory)-1)):
+#     if product_id in inventory:
+#         return inventory[product_id]
+#     else:
+#         raise HTTPException(status_code = 404, detail = "Product not found")
 
 #--------------------------------CREATE NEW PRODUCT--------------------------------#
 
@@ -91,7 +99,7 @@ async def update_product_by_patch(
     product_name: Optional[str] = Query(
         None,
         alias="Product Name",
-        description="Change Product name (not required)"
+        description="Rodrigo Gostoso S2 Change Product name (not required)"
     ),
     product_price: Optional[float] = Query(
         None,
