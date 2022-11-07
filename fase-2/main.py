@@ -24,7 +24,7 @@ def get_db():
 
 @app.get("/")
 def read_root():
-    return {"Página Inicial": "Bem vindo a API de estoque, caminhos disponíveis: '/inventory' para GET e POST , '/inventory/{product_id}' para GET, PUT, PATCH e DELETE"}
+    return {"Página Inicial": "Bem vindo a API de estoque"}
 
 
 #---------------------------------------------------------------------------------------------------------
@@ -307,6 +307,29 @@ async def delete_movement(
         db.rollback()
     return {"message": "Movement deleted successfully"}
 
+#---------------------------------------------------------------------------------------------------------
+#                                         MOV BY PRODUCT
+#---------------------------------------------------------------------------------------------------------
+#------------------------------GET MOVEMENT BY PRODUCT------------------------------#
+
+@app.get("/movement/product/{id_product}", tags=["Movement by Product"])
+async def get_movements_by_product(
+    id_product: int = Query(
+        title="Product ID",
+        description="Select the product by it's ID (it will delete the last moviment done to the product)"
+    ),
+    db: Session = Depends(get_db)
+):
+    db_product = db.query(models.Product).filter(models.Product.id == id_product).first()
+    if db_product is None:
+        raise HTTPException(status_code=400, detail="Product ID not valid")
+    movements = db.query(models.Movement).filter(models.Movement.id_product == id_product).first()
+    if movements is None:
+        raise HTTPException(status_code=400, detail="No movements done to that product")
+    return movements
+
+
+#----------------------------DELETE MOVEMENT BY PRODUCT-----------------------------#
 @app.delete("/movement/product/{id_product}", tags=["Movement by Product"])
 async def delete_last_movement_by_product(
     id_product: int = Query(
