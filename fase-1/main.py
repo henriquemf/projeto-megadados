@@ -46,11 +46,37 @@ async def get_product(
 @app.post("/inventory/", status_code=status.HTTP_201_CREATED)
 async def create_product(
     product: Product = Body(
-        example={
-            "name": "Apple", 
-            "price": 1.99, 
-            "description": "A red apple", 
-            "quantity": 10
+        examples ={
+            "right":{
+                "summary": "Right example",
+                "description": "This is the right example to use the POST method",
+                "value": {
+                    "name": "Apple",
+                    "price": 1.99,
+                    "description": "A red apple",
+                    "quantity": 10
+                }
+            },
+            "number":{
+                "summary": "Example with conversion",
+                "description": "This shows how FastAPI converts a string into numbers automatically",
+                "value": {
+                    "name": "Apple",
+                    "price": 1.99,
+                    "description": "A red apple",
+                    "quantity": 10
+                }
+            },
+            "wrong":{
+                "summary": "Wrong example",
+                "description": "In this case, FastAPI doesn't convert numbers wrote in string format",
+                "value": {
+                    "name": "Apple",
+                    "price": 1.99,
+                    "description": "A red apple",
+                    "quantity": "ten"
+                }
+            }
         }
     )
 ):
@@ -73,11 +99,37 @@ async def update_product_by_put(
         description="Select your desired Product by it's ID"
     ),
     product: Product = Body(
-        example={
-            "name": "Apple", 
-            "price": 1.99, 
-            "description": "A red apple", 
-            "quantity": 10
+        examples ={
+            "right":{
+                "summary": "Right example",
+                "description": "This is the right example to use the POST method",
+                "value": {
+                    "name": "Apple",
+                    "price": 1.99,
+                    "description": "A red apple",
+                    "quantity": 10
+                }
+            },
+            "number":{
+                "summary": "Example with conversion",
+                "description": "This shows how FastAPI converts a string into numbers automatically",
+                "value": {
+                    "name": "Apple",
+                    "price": 1.99,
+                    "description": "A red apple",
+                    "quantity": 10
+                }
+            },
+            "wrong":{
+                "summary": "Wrong example",
+                "description": "In this case, FastAPI doesn't convert numbers wrote in string format",
+                "value": {
+                    "name": "Apple",
+                    "price": 1.99,
+                    "description": "A red apple",
+                    "quantity": "ten"
+                }
+            }
         }
     )
 ):
@@ -113,7 +165,38 @@ async def update_product_by_patch(
         None,
         title="Product Quantity",
         description="Change Product quantity (not required)"
-    )
+    ),
+    product: Product = Body(examples = {
+        "name":{
+            "summary": "Change name",
+            "description": "Example changing the name of the product",
+            "value": {
+                "product_name": "Grape"
+            }
+        },
+        "price":{
+            "summary": "Change price",
+            "description": "Example changing the price of the product",
+            "value": {
+                "product_price": 10.99
+            }
+        },
+        "description":{
+            "summary": "Change description",
+            "description": "Example changing the description of the product",
+            "value": {
+                "product_description": "A grape"
+            }
+        },
+        "quantity":{
+            "summary": "Change quantity",
+            "description": "Example changing the quantity of the product",
+            "value": {
+                "product_quantity": 20
+            }
+        },
+    })
+
 ):
     if product_id not in inventory.keys():
         raise HTTPException(status_code=404, detail="Product not found")
