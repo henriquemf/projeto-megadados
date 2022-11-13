@@ -165,38 +165,7 @@ async def update_product_by_patch(
         None,
         title="Product Quantity",
         description="Change Product quantity (not required)"
-    ),
-    product: Product = Body(examples = {
-        "name":{
-            "summary": "Change name",
-            "description": "Example changing the name of the product",
-            "value": {
-                "product_name": "Grape"
-            }
-        },
-        "price":{
-            "summary": "Change price",
-            "description": "Example changing the price of the product",
-            "value": {
-                "product_price": 10.99
-            }
-        },
-        "description":{
-            "summary": "Change description",
-            "description": "Example changing the description of the product",
-            "value": {
-                "product_description": "A grape"
-            }
-        },
-        "quantity":{
-            "summary": "Change quantity",
-            "description": "Example changing the quantity of the product",
-            "value": {
-                "product_quantity": 20
-            }
-        },
-    })
-
+    )
 ):
     if product_id not in inventory.keys():
         raise HTTPException(status_code=404, detail="Product not found")
